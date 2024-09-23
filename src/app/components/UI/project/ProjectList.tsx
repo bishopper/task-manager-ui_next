@@ -12,15 +12,15 @@ const ProjectList = () => {
 		updateTask,
 		addTask,
 		deleteTask,
-		addProject, // اضافه کردن addProject
+		addProject,
 	} = useProjectStore();
 
 	const [editingProject, setEditingProject] = useState<number | null>(null);
 	const [editingTask, setEditingTask] = useState<number | null>(null);
 	const [projectName, setProjectName] = useState("");
 	const [projectDescription, setProjectDescription] = useState("");
-	const [newProjectName, setNewProjectName] = useState(""); // برای افزودن پروژه جدید
-	const [newProjectDescription, setNewProjectDescription] = useState(""); // برای افزودن پروژه جدید
+	const [newProjectName, setNewProjectName] = useState("");
+	const [newProjectDescription, setNewProjectDescription] = useState("");
 	const [newTaskTitle, setNewTaskTitle] = useState("");
 	const [newTaskDescription, setNewTaskDescription] = useState("");
 	const [taskTitle, setTaskTitle] = useState("");
@@ -31,7 +31,6 @@ const ProjectList = () => {
 		fetchProjects();
 	}, [fetchProjects]);
 
-	// Handle project editing
 	const handleEditProjectClick = (project: any) => {
 		setEditingProject(project.id);
 		setProjectName(project.name);
@@ -43,10 +42,9 @@ const ProjectList = () => {
 			name: projectName,
 			description: projectDescription,
 		});
-		setEditingProject(null); // Exit editing mode
+		setEditingProject(null);
 	};
 
-	// Handle task editing
 	const handleEditTaskClick = (task: any) => {
 		setEditingTask(task.id);
 		setTaskTitle(task.title);
@@ -60,28 +58,25 @@ const ProjectList = () => {
 			description: taskDescription,
 			status: taskStatus,
 		});
-		setEditingTask(null); // Exit editing mode
+		setEditingTask(null);
 	};
 
-	// Handle adding a new task
 	const handleAddTask = (projectId: number) => {
 		if (newTaskTitle.trim() === "") return;
 		addTask({
 			title: newTaskTitle,
 			description: newTaskDescription,
-			status: "Incompleted", // وضعیت پیش‌فرض برای تسک جدید
+			status: "Incompleted",
 			projectId,
 		});
 		setNewTaskTitle("");
 		setNewTaskDescription("");
 	};
 
-	// Handle task deletion
 	const handleDeleteTask = (taskId: number) => {
 		deleteTask(taskId);
 	};
 
-	// Handle adding a new project
 	const handleAddProject = () => {
 		if (newProjectName.trim() === "") return;
 		addProject({
@@ -122,229 +117,243 @@ const ProjectList = () => {
 				</button>
 			</div>
 
+			{/* نمایش پروژه‌ها در دو ستون */}
 			{projects.length === 0 ? (
 				<p className="text-center">No projects found.</p>
 			) : (
-				projects.map((project) => {
-					const completedTasks = project.tasks.filter(
-						(task) => task.status === "Completed"
-					).length;
-					const totalTasks = project.tasks.length;
-					const progress = totalTasks
-						? (completedTasks / totalTasks) * 100
-						: 0;
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					{projects.map((project) => {
+						const completedTasks = project.tasks.filter(
+							(task) => task.status === "Completed"
+						).length;
+						const totalTasks = project.tasks.length;
+						const progress = totalTasks
+							? (completedTasks / totalTasks) * 100
+							: 0;
 
-					return (
-						<div
-							key={project.id}
-							className="bg-white shadow-lg rounded-lg p-6 mb-6"
-						>
-							{editingProject === project.id ? (
-								<div>
-									<input
-										type="text"
-										value={projectName}
-										onChange={(e) =>
-											setProjectName(e.target.value)
-										}
-										className="border rounded px-2 py-1 mb-2 w-full"
-									/>
-									<textarea
-										value={projectDescription}
-										onChange={(e) =>
-											setProjectDescription(
-												e.target.value
-											)
-										}
-										className="border rounded px-2 py-1 mb-2 w-full"
-									/>
-									<button
-										onClick={() =>
-											handleSaveProject(project.id)
-										}
-										className="bg-blue-500 text-white px-4 py-2 rounded"
-									>
-										Save
-									</button>
-								</div>
-							) : (
-								<div>
-									<h2 className="text-2xl font-semibold mb-2">
-										{project.name}
+						return (
+							<div
+								key={project.id}
+								className="bg-white shadow-lg rounded-lg p-6"
+							>
+								{editingProject === project.id ? (
+									<div>
+										<input
+											type="text"
+											value={projectName}
+											onChange={(e) =>
+												setProjectName(e.target.value)
+											}
+											className="border rounded px-2 py-1 mb-2 w-full"
+										/>
+										<textarea
+											value={projectDescription}
+											onChange={(e) =>
+												setProjectDescription(
+													e.target.value
+												)
+											}
+											className="border rounded px-2 py-1 mb-2 w-full"
+										/>
 										<button
 											onClick={() =>
-												handleEditProjectClick(project)
+												handleSaveProject(project.id)
 											}
-											className="ml-2 text-blue-500"
+											className="bg-blue-500 text-white px-4 py-2 rounded"
 										>
-											✏️
+											Save
 										</button>
-									</h2>
-									{project.description && (
-										<p className="text-gray-600 mb-4">
-											{project.description}
-										</p>
-									)}
-								</div>
-							)}
-							<ProgressBar completed={progress} />
-
-							<div className="mt-4">
-								<h3 className="text-xl font-semibold mb-2">
-									Tasks:
-								</h3>
-								{project.tasks.length > 0 ? (
-									<ul className="list-disc pl-5">
-										{project.tasks.map((task) => (
-											<li key={task.id} className="mb-2">
-												{editingTask === task.id ? (
-													<div>
-														<input
-															type="text"
-															value={taskTitle}
-															onChange={(e) =>
-																setTaskTitle(
-																	e.target
-																		.value
-																)
-															}
-															className="border rounded px-2 py-1 mb-2 w-full"
-														/>
-														<textarea
-															value={
-																taskDescription
-															}
-															onChange={(e) =>
-																setTaskDescription(
-																	e.target
-																		.value
-																)
-															}
-															className="border rounded px-2 py-1 mb-2 w-full"
-														/>
-														<select
-															value={taskStatus}
-															onChange={(e) =>
-																setTaskStatus(
-																	e.target
-																		.value
-																)
-															}
-															className="border rounded px-2 py-1 mb-2 w-full"
-														>
-															<option value="InProccess">
-																In Proccess
-															</option>
-															<option value="Completed">
-																Completed
-															</option>
-															<option value="Incompleted">
-																Incompleted
-															</option>
-														</select>
-														<button
-															onClick={() =>
-																handleSaveTask(
-																	task.id
-																)
-															}
-															className="bg-green-500 text-white px-4 py-2 rounded"
-														>
-															Save
-														</button>
-													</div>
-												) : (
-													<div>
-														<span className="font-bold">
-															{task.title}
-														</span>{" "}
-														-{" "}
-														<span
-															className={`px-2 py-1 rounded ${
-																task.status ===
-																"Completed"
-																	? "bg-green-500 text-white"
-																	: task.status ===
-																	  "Incompleted"
-																	? "bg-red-500 text-white"
-																	: "bg-yellow-300"
-															}`}
-														>
-															{task.status}
-														</span>
-														<button
-															onClick={() =>
-																handleEditTaskClick(
-																	task
-																)
-															}
-															className="ml-2 text-blue-500"
-														>
-															✏️
-														</button>
-														<button
-															onClick={() =>
-																handleDeleteTask(
-																	task.id
-																)
-															}
-															className="ml-2 text-red-500"
-														>
-															🗑️
-														</button>
-														{task.description && (
-															<p className="text-gray-500 ml-4">
-																{
-																	task.description
-																}
-															</p>
-														)}
-													</div>
-												)}
-											</li>
-										))}
-									</ul>
+									</div>
 								) : (
-									<p>No tasks found for this project.</p>
+									<div>
+										<h2 className="text-2xl font-semibold mb-2">
+											{project.name}
+											<button
+												onClick={() =>
+													handleEditProjectClick(
+														project
+													)
+												}
+												className="ml-2 text-blue-500"
+											>
+												✏️
+											</button>
+										</h2>
+										{project.description && (
+											<p className="text-gray-600 mb-4">
+												{project.description}
+											</p>
+										)}
+									</div>
 								)}
 
-								{/* فرم افزودن تسک جدید */}
+								{/* نوار پیشرفت */}
+								<ProgressBar completed={progress} />
+
 								<div className="mt-4">
-									<h3 className="text-lg font-semibold mb-2">
-										Add New Task:
+									<h3 className="text-xl font-semibold mb-2">
+										Tasks:
 									</h3>
-									<input
-										type="text"
-										value={newTaskTitle}
-										onChange={(e) =>
-											setNewTaskTitle(e.target.value)
-										}
-										placeholder="Task title"
-										className="border rounded px-2 py-1 mb-2 w-full"
-									/>
-									<textarea
-										value={newTaskDescription}
-										onChange={(e) =>
-											setNewTaskDescription(
-												e.target.value
-											)
-										}
-										placeholder="Task description"
-										className="border rounded px-2 py-1 mb-2 w-full"
-									/>
-									<button
-										onClick={() =>
-											handleAddTask(project.id)
-										}
-										className="bg-blue-500 text-white px-4 py-2 rounded"
-									>
-										Add Task
-									</button>
+									{project.tasks.length > 0 ? (
+										<ul className="list-disc pl-5">
+											{project.tasks.map((task) => (
+												<li
+													key={task.id}
+													className="mb-2"
+												>
+													{editingTask === task.id ? (
+														<div>
+															<input
+																type="text"
+																value={
+																	taskTitle
+																}
+																onChange={(e) =>
+																	setTaskTitle(
+																		e.target
+																			.value
+																	)
+																}
+																className="border rounded px-2 py-1 mb-2 w-full"
+															/>
+															<textarea
+																value={
+																	taskDescription
+																}
+																onChange={(e) =>
+																	setTaskDescription(
+																		e.target
+																			.value
+																	)
+																}
+																className="border rounded px-2 py-1 mb-2 w-full"
+															/>
+															<select
+																value={
+																	taskStatus
+																}
+																onChange={(e) =>
+																	setTaskStatus(
+																		e.target
+																			.value
+																	)
+																}
+																className="border rounded px-2 py-1 mb-2 w-full"
+															>
+																<option value="InProccess">
+																	In Proccess
+																</option>
+																<option value="Completed">
+																	Completed
+																</option>
+																<option value="Incompleted">
+																	Incompleted
+																</option>
+															</select>
+															<button
+																onClick={() =>
+																	handleSaveTask(
+																		task.id
+																	)
+																}
+																className="bg-green-500 text-white px-4 py-2 rounded"
+															>
+																Save
+															</button>
+														</div>
+													) : (
+														<div>
+															<span className="font-bold">
+																{task.title}
+															</span>{" "}
+															-{" "}
+															<span
+																className={`px-2 py-1 rounded ${
+																	task.status ===
+																	"Completed"
+																		? "bg-green-500 text-white"
+																		: task.status ===
+																		  "Incompleted"
+																		? "bg-red-500 text-white"
+																		: "bg-yellow-300"
+																}`}
+															>
+																{task.status}
+															</span>
+															<button
+																onClick={() =>
+																	handleEditTaskClick(
+																		task
+																	)
+																}
+																className="ml-2 text-blue-500"
+															>
+																✏️
+															</button>
+															<button
+																onClick={() =>
+																	handleDeleteTask(
+																		task.id
+																	)
+																}
+																className="ml-2 text-red-500"
+															>
+																🗑️
+															</button>
+															{task.description && (
+																<p className="text-gray-500 ml-4">
+																	{
+																		task.description
+																	}
+																</p>
+															)}
+														</div>
+													)}
+												</li>
+											))}
+										</ul>
+									) : (
+										<p>No tasks found for this project.</p>
+									)}
+
+									{/* فرم افزودن تسک جدید */}
+									<div className="mt-4">
+										<h3 className="text-lg font-semibold mb-2">
+											Add New Task:
+										</h3>
+										<input
+											type="text"
+											value={newTaskTitle}
+											onChange={(e) =>
+												setNewTaskTitle(e.target.value)
+											}
+											placeholder="Task title"
+											className="border rounded px-2 py-1 mb-2 w-full"
+										/>
+										<textarea
+											value={newTaskDescription}
+											onChange={(e) =>
+												setNewTaskDescription(
+													e.target.value
+												)
+											}
+											placeholder="Task description"
+											className="border rounded px-2 py-1 mb-2 w-full"
+										/>
+										<button
+											onClick={() =>
+												handleAddTask(project.id)
+											}
+											className="bg-green-500 text-white px-4 py-2 rounded"
+										>
+											Add Task
+										</button>
+									</div>
 								</div>
 							</div>
-						</div>
-					);
-				})
+						);
+					})}
+				</div>
 			)}
 		</div>
 	);
