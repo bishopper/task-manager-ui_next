@@ -16,16 +16,16 @@ const ProjectList = () => {
 	} = useProjectStore();
 
 	const [editingProject, setEditingProject] = useState<number | null>(null);
-	const [editingTask, setEditingTask] = useState<number | null>(null);
 	const [projectName, setProjectName] = useState("");
 	const [projectDescription, setProjectDescription] = useState("");
 	const [newProjectName, setNewProjectName] = useState("");
 	const [newProjectDescription, setNewProjectDescription] = useState("");
 	const [newTaskTitle, setNewTaskTitle] = useState("");
 	const [newTaskDescription, setNewTaskDescription] = useState("");
-	const [taskTitle, setTaskTitle] = useState("");
-	const [taskDescription, setTaskDescription] = useState("");
-	const [taskStatus, setTaskStatus] = useState("");
+	const [editingTask, setEditingTask] = useState<number | null>(null);
+	const [taskData, setTaskData] = useState<{
+		[key: number]: { title: string; description: string; status: string };
+	}>({});
 
 	useEffect(() => {
 		fetchProjects();
@@ -47,18 +47,30 @@ const ProjectList = () => {
 
 	const handleEditTaskClick = (task: any) => {
 		setEditingTask(task.id);
-		setTaskTitle(task.title);
-		setTaskDescription(task.description || "");
-		setTaskStatus(task.status);
+		setTaskData((prev) => ({
+			...prev,
+			[task.id]: {
+				title: task.title,
+				description: task.description || "",
+				status: task.status,
+			},
+		}));
 	};
 
 	const handleSaveTask = (taskId: number) => {
-		updateTask(taskId, {
-			title: taskTitle,
-			description: taskDescription,
-			status: taskStatus,
-		});
+		const { title, description, status } = taskData[taskId];
+		updateTask(taskId, { title, description, status });
 		setEditingTask(null);
+	};
+
+	const handleTaskChange = (taskId: number, key: string, value: string) => {
+		setTaskData((prev) => ({
+			...prev,
+			[taskId]: {
+				...prev[taskId],
+				[key]: value,
+			},
+		}));
 	};
 
 	const handleAddTask = (projectId: number) => {
@@ -93,7 +105,6 @@ const ProjectList = () => {
 				Projects and Tasks
 			</h1>
 
-			{/* فرم افزودن پروژه جدید */}
 			<div className="bg-white shadow-lg rounded-lg p-6 mb-6">
 				<h2 className="text-2xl font-semibold mb-4">Add New Project</h2>
 				<input
@@ -117,7 +128,6 @@ const ProjectList = () => {
 				</button>
 			</div>
 
-			{/* نمایش پروژه‌ها در دو ستون */}
 			{projects.length === 0 ? (
 				<p className="text-center">No projects found.</p>
 			) : (
@@ -187,7 +197,6 @@ const ProjectList = () => {
 									</div>
 								)}
 
-								{/* نوار پیشرفت */}
 								<ProgressBar completed={progress} />
 
 								<div className="mt-4">
@@ -206,10 +215,15 @@ const ProjectList = () => {
 															<input
 																type="text"
 																value={
-																	taskTitle
+																	taskData[
+																		task.id
+																	]?.title ||
+																	""
 																}
 																onChange={(e) =>
-																	setTaskTitle(
+																	handleTaskChange(
+																		task.id,
+																		"title",
 																		e.target
 																			.value
 																	)
@@ -218,10 +232,16 @@ const ProjectList = () => {
 															/>
 															<textarea
 																value={
-																	taskDescription
+																	taskData[
+																		task.id
+																	]
+																		?.description ||
+																	""
 																}
 																onChange={(e) =>
-																	setTaskDescription(
+																	handleTaskChange(
+																		task.id,
+																		"description",
 																		e.target
 																			.value
 																	)
@@ -230,10 +250,15 @@ const ProjectList = () => {
 															/>
 															<select
 																value={
-																	taskStatus
+																	taskData[
+																		task.id
+																	]?.status ||
+																	"Incompleted"
 																}
 																onChange={(e) =>
-																	setTaskStatus(
+																	handleTaskChange(
+																		task.id,
+																		"status",
 																		e.target
 																			.value
 																	)
@@ -316,7 +341,6 @@ const ProjectList = () => {
 										<p>No tasks found for this project.</p>
 									)}
 
-									{/* فرم افزودن تسک جدید */}
 									<div className="mt-4">
 										<h3 className="text-lg font-semibold mb-2">
 											Add New Task:
