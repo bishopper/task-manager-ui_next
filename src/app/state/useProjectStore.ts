@@ -35,10 +35,10 @@ export const useProjectStore = create<ProjectStore>((set) => ({
 	fetchProjects: async () => {
 		try {
 			const projectsResponse = await axios.get(
-				"http://localhost:3000/projects"
+				"http://localhost:3001/projects"
 			);
 			const tasksResponse = await axios.get(
-				"http://localhost:3000/tasks"
+				"http://localhost:3001/tasks"
 			);
 
 			const projects = projectsResponse.data.map((project: Project) => ({
@@ -57,7 +57,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
 	updateProject: async (id: number, updatedProject: Partial<Project>) => {
 		try {
 			await axios.patch(
-				`http://localhost:3000/projects/${id}`,
+				`http://localhost:3001/projects/${id}`,
 				updatedProject
 			);
 			set((state) => ({
@@ -75,7 +75,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
 	updateTask: async (taskId: number, updatedTask: Partial<Task>) => {
 		try {
 			await axios.patch(
-				`http://localhost:3000/tasks/${taskId}`,
+				`http://localhost:3001/tasks/${taskId}`,
 				updatedTask
 			);
 			set((state: ProjectStore) => ({
@@ -94,7 +94,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
 	addTask: async (newTask: Omit<Task, "id">) => {
 		try {
 			const response = await axios.post(
-				"http://localhost:3000/tasks",
+				"http://localhost:3001/tasks",
 				newTask
 			);
 			const createdTask = response.data;
@@ -113,7 +113,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
 
 	deleteTask: async (taskId: number) => {
 		try {
-			await axios.delete(`http://localhost:3000/tasks/${taskId}`);
+			await axios.delete(`http://localhost:3001/tasks/${taskId}`);
 			set((state: ProjectStore) => ({
 				projects: state.projects.map((project: Project) => ({
 					...project,
@@ -131,7 +131,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
 	addProject: async (newProject: Omit<Project, "id" | "tasks">) => {
 		try {
 			const response = await axios.post(
-				"http://localhost:3000/projects",
+				"http://localhost:3001/projects",
 				newProject
 			);
 			const createdProject = response.data;
